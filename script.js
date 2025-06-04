@@ -3,15 +3,19 @@ const resultado = document.getElementById('resultado');
 
 const apiKey = 'dc9622e76c7ae551aaa95734ef641e14'; 
 
+// Pedir permissão logo ao carregar
+document.addEventListener('DOMContentLoaded', () => {
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+});
+
 // Sistema de Notificação
 function enviarNotificacao(mensagem) {
   if (Notification.permission === 'granted') {
-    new Notification(mensagem);
-  } else if (Notification.permission !== 'denied') {
-    Notification.requestPermission().then(permission => {
-      if (permission === 'granted') {
-        new Notification(mensagem);
-      }
+    new Notification('Alerta do Clima', {
+      body: mensagem,
+      icon: 'https://cdn-icons-png.flaticon.com/512/1116/1116453.png'
     });
   }
 }
@@ -51,7 +55,6 @@ btn.addEventListener('click', async () => {
 
     const clima = await obterClima(localizacao.lat, localizacao.lon);
 
-    // Verificação se a resposta contém weather[0]
     if (clima.weather && clima.weather.length > 0) {
       const descricao = clima.weather[0].description;
       const temperatura = clima.main.temp;
@@ -62,7 +65,6 @@ btn.addEventListener('click', async () => {
         Temperatura: ${temperatura} °C
       `;
 
-      // Notificação de condição extrema
       if (descricao.includes('chuva') || temperatura > 35) {
         enviarNotificacao(`Alerta: ${descricao}, ${temperatura} °C`);
       }
