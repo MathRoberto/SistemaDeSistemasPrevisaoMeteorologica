@@ -1,14 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Sistema de Sistemas - Clima</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sistema de Clima</title>
+
+  <!-- Favicon - Ícone de Termômetro -->
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/869/869869.png">
+
+  <!-- Estilo do Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Seu CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <h1>Sistema de Monitoramento de Clima</h1>
+
+  <h1>Sistema de Monitoramento Climático</h1>
+
   <button id="btn-verificar">Verificar Clima</button>
+
   <div id="resultado"></div>
+
+  <div id="map" style="
+    height: 300px; 
+    width: 100%; 
+    max-width: 500px; 
+    margin-top: 20px; 
+    border-radius: 15px; 
+    overflow: hidden;
+    display: none; /* Oculta até carregar a localização */">
+    </div>
+
+  <!-- Script do Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Seu Script -->
   <script src="script.js"></script>
 </body>
 </html>

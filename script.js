@@ -1,7 +1,7 @@
 const btn = document.getElementById('btn-verificar');
 const resultado = document.getElementById('resultado');
 
-const apiKey = 'dc9622e76c7ae551aaa95734ef641e14'; 
+const apiKey = 'dc9622e76c7ae551aaa95734ef641e14';
 
 // Pedir permissão logo ao carregar
 document.addEventListener('DOMContentLoaded', () => {
@@ -46,9 +46,10 @@ function obterLocalizacao() {
   });
 }
 
+// Evento de clique no botão
 btn.addEventListener('click', async () => {
   resultado.textContent = 'Obtendo localização...';
-  
+
   try {
     const localizacao = await obterLocalizacao();
     resultado.textContent = 'Obtendo clima...';
@@ -65,13 +66,41 @@ btn.addEventListener('click', async () => {
         Temperatura: ${temperatura} °C
       `;
 
-      if (descricao.includes('chuva') || temperatura > 35) {
-        enviarNotificacao(`Alerta: ${descricao}, ${temperatura} °C`);
+      // Sempre envia notificação com clima e temperatura
+      let mensagem = `Clima: ${descricao}, ${temperatura} °C`;
+
+      // Se temperatura for maior que 35°C, adiciona alerta
+      if (temperatura > 35) {
+        mensagem = `⚠️ ALERTA DE CALOR! ${mensagem}`;
       }
+
+      enviarNotificacao(mensagem);
+
+      // Exibe o mapa
+      const mapDiv = document.getElementById('map');
+      mapDiv.style.display = 'block';
+
+      // Remove mapa anterior, se tiver
+      if (mapDiv._leaflet_id) {
+        mapDiv._leaflet_id = null;
+        mapDiv.innerHTML = "";
+      }
+
+      // Cria o mapa com Leaflet
+      const map = L.map('map').setView([localizacao.lat, localizacao.lon], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      L.marker([localizacao.lat, localizacao.lon]).addTo(map)
+        .bindPopup(`${clima.name}`)
+        .openPopup();
+
     } else {
       resultado.innerHTML = `Erro na resposta da API: ${clima.message || 'Resposta inesperada'}`;
     }
-    
+
   } catch (error) {
     resultado.textContent = `Erro: ${error.message || error}`;
   }
