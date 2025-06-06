@@ -13,8 +13,11 @@
   <h1>Sistema de Monitoramento Climático</h1>
   <button id="btn-verificar">Verificar Clima</button>
 
+  <div id="loading-overlay" class="hidden">
+    Obtendo clima...
+  </div>
+
   <div id="info-container">
-    <!-- Coluna esquerda -->
     <div class="col col-esquerda">
       <div id="previsao"></div>
       <div id="atividade"></div>
@@ -22,12 +25,10 @@
       <div id="alertas"></div>
     </div>
 
-    <!-- Coluna central -->
     <div class="col col-centro">
       <div id="map" class="map-box"></div>
     </div>
 
-    <!-- Coluna direita -->
     <div class="col col-direita">
       <div id="resultado"></div>
       <div id="previsao-amanha"></div>

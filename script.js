@@ -6,6 +6,7 @@ const atividadeDiv = document.getElementById('atividade');
 const qualidadeArDiv = document.getElementById('qualidade-ar');
 const alertasDiv = document.getElementById('alertas');
 const mapDiv = document.getElementById('map');
+const loadingOverlay = document.getElementById('loading-overlay');
 
 const apiKey = 'dc9622e76c7ae551aaa95734ef641e14';
 
@@ -101,18 +102,39 @@ function obterPrevisaoAmanha(previsao) {
 
   if (lista.length === 0) return "Sem dados disponíveis para amanhã.";
 
-  return lista.map(item => {
-    const dt = new Date(item.dt * 1000);
-    const hora = dt.getHours().toString().padStart(2, '0');
-    const desc = item.weather[0].description;
-    const temp = item.main.temp;
-    return `${hora}h - ${desc}, ${temp.toFixed(1)} °C`;
-  }).join('<br>');
+  const max = Math.max(...lista.map(i => i.main.temp_max));
+  const min = Math.min(...lista.map(i => i.main.temp_min));
+  const desc = lista[0].weather[0].description;
+
+  return `Clima: ${desc}. Temperatura entre ${min.toFixed(1)}°C e ${max.toFixed(1)}°C.`;
 }
 
-// Clique no botão
+// Controle do mapa
+let map = null;
+let marker = null;
+
+function mostrarMapa(lat, lon) {
+  if (!map) {
+    map = L.map('map').setView([lat, lon], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+  } else {
+    map.setView([lat, lon], 12);
+  }
+
+  if (marker) {
+    marker.setLatLng([lat, lon]);
+  } else {
+    marker = L.marker([lat, lon]).addTo(map);
+  }
+}
+
+// Evento do botão
 btn.addEventListener('click', async () => {
-  resultado.textContent = 'Obtendo localização...';
+  loadingOverlay.classList.remove('hidden');
+
+  resultado.textContent = '';
   previsaoDiv.textContent = '';
   previsaoAmanhaDiv.textContent = '';
   atividadeDiv.textContent = '';
@@ -122,82 +144,59 @@ btn.addEventListener('click', async () => {
 
   try {
     const localizacao = await obterLocalizacao();
-    resultado.textContent = 'Obtendo clima...';
 
     const clima = await obterClima(localizacao.lat, localizacao.lon);
     const previsao = await obterPrevisao(localizacao.lat, localizacao.lon);
     const qualidadeAr = await obterQualidadeAr(localizacao.lat, localizacao.lon);
 
     if (clima.weather && clima.weather.length > 0) {
-      const descricao = clima.weather[0].description;
-      const temperatura = clima.main.temp;
-      const sensacao = clima.main.feels_like;
-      const recomendacao = recomendarRoupa(temperatura, descricao);
-      const atividade = sugerirAtividade(descricao);
+      // Dados do clima atual
+      const temp = clima.main.temp.toFixed(1);
+      const desc = clima.weather[0].description;
+      const hum = clima.main.humidity;
+      const vento = (clima.wind.speed * 3.6).toFixed(1);
+      const pressao = clima.main.pressure;
 
-      const previsoes = previsao.list.slice(0, 3).map(item => {
-        const dt = new Date(item.dt * 1000);
-        const hora = dt.getHours().toString().padStart(2, '0');
-        const desc = item.weather[0].description;
-        const temp = item.main.temp;
-        return `${hora}h - ${desc}, ${temp.toFixed(1)} °C`;
-      }).join('<br>');
-
-      const previsaoAmanhaTexto = obterPrevisaoAmanha(previsao);
-
-      const aqi = qualidadeAr.list[0].main.aqi;
-      const qualidadeTexto = interpretarQualidadeAr(aqi);
-
+      // === Alterações aqui ===
       resultado.innerHTML = `
-        <strong>Local:</strong> ${clima.name}<br>
-        <strong>Clima:</strong> ${descricao}<br>
-        <strong>Temperatura:</strong> ${temperatura.toFixed(1)} °C<br>
-        <strong>Sensação térmica:</strong> ${sensacao.toFixed(1)} °C<br>
-        <strong>Recomendação:</strong> ${recomendacao}
+        <strong>🌡️ Clima Atual:</strong><br>
+        <strong>Temperatura:</strong> ${temp} °C<br>
+        <strong>Clima:</strong> ${desc}<br>
+        <strong>Umidade:</strong> ${hum}%<br>
+        <strong>Vento:</strong> ${vento} km/h<br>
+        <strong>Pressão:</strong> ${pressao} hPa
       `;
 
-      previsaoDiv.innerHTML = `<strong>Previsão para as próximas horas:</strong><br>${previsoes}`;
-      previsaoAmanhaDiv.innerHTML = `<strong>Previsão para amanhã:</strong><br>${previsaoAmanhaTexto}`;
-      atividadeDiv.innerHTML = `<strong>Sugestão de atividade:</strong><br>${atividade}`;
-      qualidadeArDiv.innerHTML = `<strong>Qualidade do ar:</strong><br>${qualidadeTexto}`;
-      alertasDiv.innerHTML = `<strong>Alertas:</strong><br>Nenhum alerta grave no momento.`;
+      const resumoHoje = previsao.list[0].weather[0].description;
+      previsaoDiv.innerHTML = `<strong>🕒 Previsão para Hoje:</strong><br>${resumoHoje}`;
 
-      // Exibir blocos
-      resultado.style.display = 'block';
-      previsaoDiv.style.display = 'block';
-      previsaoAmanhaDiv.style.display = 'block';
-      atividadeDiv.style.display = 'block';
-      qualidadeArDiv.style.display = 'block';
-      alertasDiv.style.display = 'block';
+      const textoPrevisaoAmanha = obterPrevisaoAmanha(previsao);
+      previsaoAmanhaDiv.innerHTML = `<strong>🗓️ Previsão para Amanhã:</strong><br>${textoPrevisaoAmanha}`;
 
-      // Notificação
-      let mensagem = `Clima: ${descricao}, ${temperatura.toFixed(1)} °C`;
-      if (temperatura > 35) mensagem = `⚠️ ALERTA DE CALOR! ${mensagem}`;
-      enviarNotificacao(mensagem);
+      const recomendacao = recomendarRoupa(clima.main.temp, desc);
+      atividadeDiv.innerHTML = `<strong>👕 Recomendações:</strong><br>${recomendacao}`;
 
-      // Mapa
-      mapDiv.classList.add('active');
-      if (mapDiv._leaflet_id) {
-        mapDiv._leaflet_id = null;
-        mapDiv.innerHTML = '';
+      const qualidade = interpretarQualidadeAr(qualidadeAr.list[0].main.aqi);
+      qualidadeArDiv.innerHTML = `<strong>💨 Qualidade do Ar:</strong><br>${qualidade}`;
+
+      if (previsao.city && previsao.city.alerts && previsao.city.alerts.length > 0) {
+        const textoAlertas = previsao.city.alerts.map(a => a.description).join('<br>');
+        alertasDiv.innerHTML = `<strong>⚠️ Alertas:</strong><br>${textoAlertas}`;
+        enviarNotificacao(previsao.city.alerts.map(a => a.description).join('\n'));
+      } else {
+        alertasDiv.innerHTML = `<strong>⚠️ Alertas:</strong><br>Nenhum alerta climático.`;
       }
+      // === Fim das alterações ===
 
-      const map = L.map('map').setView([localizacao.lat, localizacao.lon], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      L.marker([localizacao.lat, localizacao.lon]).addTo(map)
-        .bindPopup(`${clima.name}`)
-        .openPopup();
+      mapDiv.classList.add('active');
+      mostrarMapa(localizacao.lat, localizacao.lon);
 
     } else {
-      resultado.innerHTML = `Erro na resposta da API: ${clima.message || 'Resposta inesperada'}`;
-      resultado.style.display = 'block';
+      resultado.textContent = `Erro na resposta da API: ${clima.message || 'Resposta inesperada'}`;
     }
-
   } catch (error) {
     resultado.textContent = `Erro: ${error.message || error}`;
-    resultado.style.display = 'block';
+  } finally {
+    loadingOverlay.classList.add('hidden');
   }
 });

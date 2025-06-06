@@ -3,6 +3,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #f0f0f0;
 }
 
 body {
@@ -15,6 +17,7 @@ body {
   min-height: 100vh;
   padding: 20px;
   text-align: center;
+  position: relative;
 }
 
 h1 {
@@ -47,78 +50,6 @@ button:hover {
 
 #info-container {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-  max-width: 1100px;
-  width: 100%;
-}
-
-#col-esquerda {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-#col-mapa {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-#resultado,
-#previsao,
-#previsao-amanha,
-#atividade,
-#qualidade-ar,
-#alertas {
-  font-size: 1.1rem;
-  font-weight: 500;
-  padding: 15px 25px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  backdrop-filter: blur(10px);
-  word-wrap: break-word;
-  display: none;
-  align-self: start;
-  transition: background 0.4s ease, transform 0.3s ease;
-}
-
-#resultado:not(:empty),
-#previsao:not(:empty),
-#previsao-amanha:not(:empty),
-#atividade:not(:empty),
-#qualidade-ar:not(:empty),
-#alertas:not(:empty) {
-  display: block;
-}
-
-#resultado:hover,
-#previsao:hover,
-#previsao-amanha:hover,
-#atividade:hover,
-#qualidade-ar:hover,
-#alertas:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.map-box {
-  height: 500px;
-  width: 100%;
-  max-width: 350px;
-  min-width: 280px;
-  border-radius: 15px;
-  overflow: hidden;
-  display: none;
-}
-
-.map-box.active {
-  display: block;
-}
-
-#info-container {
-  display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 20px;
   align-items: start;
@@ -128,15 +59,12 @@ button:hover {
   padding: 0 20px;
 }
 
-
-/* Colunas */
 .col {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Mapa central */
 .col-centro {
   justify-content: center;
   align-items: center;
@@ -155,7 +83,6 @@ button:hover {
   display: block;
 }
 
-/* Estilo das caixas */
 #resultado,
 #previsao,
 #previsao-amanha,
@@ -184,7 +111,6 @@ button:hover {
   display: block;
 }
 
-/* Hover bonito */
 #resultado:hover,
 #previsao:hover,
 #previsao-amanha:hover,
@@ -193,6 +119,28 @@ button:hover {
 #alertas:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
+}
+
+/* Loading Overlay */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  user-select: none;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* Responsividade */
@@ -212,14 +160,9 @@ button:hover {
   }
 }
 
-/* Responsivo */
 @media (max-width: 768px) {
   #info-container {
     grid-template-columns: 1fr;
-  }
-
-  #col-mapa {
-    margin-top: 20px;
   }
 
   .map-box {
@@ -227,6 +170,7 @@ button:hover {
     max-width: 100%;
   }
 }
+
 @media (max-width: 480px) {
   h1 {
     font-size: 2rem;
