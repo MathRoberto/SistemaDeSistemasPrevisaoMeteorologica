@@ -4,12 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sistema de Clima</title>
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/869/869869.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
-  
 </head>
 
 <body>
@@ -17,26 +14,25 @@
   <button id="btn-verificar">Verificar Clima</button>
 
   <div id="info-container">
-  <!-- Coluna esquerda (pequenas) -->
-  <div class="col col-esquerda">
-    <div id="atividade"></div>
-    <div id="qualidade-ar"></div>
-    <div id="alertas"></div>
-  </div>
+    <!-- Coluna esquerda -->
+    <div class="col col-esquerda">
+      <div id="previsao"></div>
+      <div id="atividade"></div>
+      <div id="qualidade-ar"></div>
+      <div id="alertas"></div>
+    </div>
 
-  <!-- Coluna central (mapa) -->
-  <div class="col col-centro">
-    <div id="map" class="map-box"></div>
-  </div>
+    <!-- Coluna central -->
+    <div class="col col-centro">
+      <div id="map" class="map-box"></div>
+    </div>
 
-  <!-- Coluna direita (maiores) -->
-  <div class="col col-direita">
-    <div id="resultado"></div>
-    <div id="previsao"></div>
-    <div id="previsao-amanha"></div>
+    <!-- Coluna direita -->
+    <div class="col col-direita">
+      <div id="resultado"></div>
+      <div id="previsao-amanha"></div>
+    </div>
   </div>
-</div>
-
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="script.js"></script>
