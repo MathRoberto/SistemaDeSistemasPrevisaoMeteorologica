@@ -95,19 +95,38 @@ function obterPrevisaoAmanha(previsao) {
   const mes = amanha.getMonth();
   const ano = amanha.getFullYear();
 
-  const lista = previsao.list.filter(item => {
+  // Filter for forecast data specific to tomorrow
+  const listaAmanha = previsao.list.filter(item => {
     const data = new Date(item.dt * 1000);
     return data.getDate() === dia && data.getMonth() === mes && data.getFullYear() === ano;
   });
 
-  if (lista.length === 0) return "Sem dados disponíveis para amanhã.";
+  if (listaAmanha.length === 0) return "Sem dados disponíveis para amanhã.";
 
-  const max = Math.max(...lista.map(i => i.main.temp_max));
-  const min = Math.min(...lista.map(i => i.main.temp_min));
-  const desc = lista[0].weather[0].description;
+  // Calculate average values for tomorrow
+  const temperaturas = listaAmanha.map(item => item.main.temp);
+  const umidades = listaAmanha.map(item => item.main.humidity);
+  const velocidadesVento = listaAmanha.map(item => item.wind.speed);
+  const pressoes = listaAmanha.map(item => item.main.pressure);
 
-  return `Clima: ${desc}. Temperatura entre ${min.toFixed(1)}°C e ${max.toFixed(1)}°C.`;
+  const avgTemp = temperaturas.reduce((sum, temp) => sum + temp, 0) / temperaturas.length;
+  const avgHumidity = umidades.reduce((sum, hum) => sum + hum, 0) / umidades.length;
+  const avgWindSpeed = velocidadesVento.reduce((sum, speed) => sum + speed, 0) / velocidadesVento.length;
+  const avgPressure = pressoes.reduce((sum, pressure) => sum + pressure, 0) / pressoes.length;
+
+  const maxTemp = Math.max(...listaAmanha.map(i => i.main.temp_max));
+  const minTemp = Math.min(...listaAmanha.map(i => i.main.temp_min));
+  const principalDescricao = listaAmanha[0].weather[0].description; // Get description from the first available forecast for tomorrow
+
+  return `
+    <strong>Temperatura Média:</strong> ${avgTemp.toFixed(1)} °C (Min: ${minTemp.toFixed(1)}°C, Max: ${maxTemp.toFixed(1)}°C)<br>
+    <strong>Clima:</strong> ${principalDescricao}<br>
+    <strong>Umidade Média:</strong> ${avgHumidity.toFixed(1)}%<br>
+    <strong>Vento Médio:</strong> ${(avgWindSpeed * 3.6).toFixed(1)} km/h<br>
+    <strong>Pressão Média:</strong> ${avgPressure.toFixed(1)} hPa
+  `;
 }
+
 
 // Controle do mapa
 let map = null;
@@ -157,7 +176,6 @@ btn.addEventListener('click', async () => {
       const vento = (clima.wind.speed * 3.6).toFixed(1);
       const pressao = clima.main.pressure;
 
-      // === Alterações aqui ===
       resultado.innerHTML = `
         <strong>🌡️ Clima Atual:</strong><br>
         <strong>Temperatura:</strong> ${temp} °C<br>
@@ -186,7 +204,6 @@ btn.addEventListener('click', async () => {
       } else {
         alertasDiv.innerHTML = `<strong>⚠️ Alertas:</strong><br>Nenhum alerta climático.`;
       }
-      // === Fim das alterações ===
 
       mapDiv.classList.add('active');
       mostrarMapa(localizacao.lat, localizacao.lon);
