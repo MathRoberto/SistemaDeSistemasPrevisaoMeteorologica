@@ -95,7 +95,7 @@ function obterPrevisaoAmanha(previsao) {
   const mes = amanha.getMonth();
   const ano = amanha.getFullYear();
 
-  // Filter for forecast data specific to tomorrow
+  // Filtrar previsões para amanhã
   const listaAmanha = previsao.list.filter(item => {
     const data = new Date(item.dt * 1000);
     return data.getDate() === dia && data.getMonth() === mes && data.getFullYear() === ano;
@@ -103,7 +103,7 @@ function obterPrevisaoAmanha(previsao) {
 
   if (listaAmanha.length === 0) return "Sem dados disponíveis para amanhã.";
 
-  // Calculate average values for tomorrow
+  // Calcular dados de amanhã
   const temperaturas = listaAmanha.map(item => item.main.temp);
   const umidades = listaAmanha.map(item => item.main.humidity);
   const velocidadesVento = listaAmanha.map(item => item.wind.speed);
@@ -168,7 +168,7 @@ btn.addEventListener('click', async () => {
     const qualidadeAr = await obterQualidadeAr(localizacao.lat, localizacao.lon);
 
     if (clima.weather && clima.weather.length > 0) {
-      // 📌 Dados principais
+      // Dados principais
       const temp = clima.main.temp.toFixed(1);
       const desc = clima.weather[0].description;
       const icone = clima.weather[0].icon;
@@ -177,7 +177,7 @@ btn.addEventListener('click', async () => {
       const vento = (clima.wind.speed * 3.6).toFixed(1);
       const pressao = clima.main.pressure;
 
-      // ☀️ Nascer e pôr do sol
+      // Nascer e pôr do sol
       const nascer = new Date(clima.sys.sunrise * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       const por = new Date(clima.sys.sunset * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
