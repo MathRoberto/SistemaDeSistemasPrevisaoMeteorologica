@@ -149,7 +149,6 @@ function mostrarMapa(lat, lon) {
   }
 }
 
-// Evento do botão
 btn.addEventListener('click', async () => {
   loadingOverlay.classList.remove('hidden');
 
@@ -169,48 +168,69 @@ btn.addEventListener('click', async () => {
     const qualidadeAr = await obterQualidadeAr(localizacao.lat, localizacao.lon);
 
     if (clima.weather && clima.weather.length > 0) {
-      // Dados do clima atual
+      // 📌 Dados principais
       const temp = clima.main.temp.toFixed(1);
       const desc = clima.weather[0].description;
+      const icone = clima.weather[0].icon;
+      const iconeURL = `https://openweathermap.org/img/wn/${icone}@2x.png`;
       const hum = clima.main.humidity;
       const vento = (clima.wind.speed * 3.6).toFixed(1);
       const pressao = clima.main.pressure;
 
+      // ☀️ Nascer e pôr do sol
+      const nascer = new Date(clima.sys.sunrise * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const por = new Date(clima.sys.sunset * 1000).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
       resultado.innerHTML = `
         <strong>🌡️ Clima Atual:</strong><br>
+        <img src="${iconeURL}" alt="${desc}" title="${desc}" width="60"><br>
         <strong>Temperatura:</strong> ${temp} °C<br>
         <strong>Clima:</strong> ${desc}<br>
         <strong>Umidade:</strong> ${hum}%<br>
         <strong>Vento:</strong> ${vento} km/h<br>
-        <strong>Pressão:</strong> ${pressao} hPa
+        <strong>Pressão:</strong> ${pressao} hPa<br>
+        <strong>☀️ Nascer do Sol:</strong> ${nascer}<br>
+        <strong>🌇 Pôr do Sol:</strong> ${por}
       `;
 
+      // Previsão resumida do primeiro item + probabilidade de chuva
       const resumoHoje = previsao.list[0].weather[0].description;
-      previsaoDiv.innerHTML = `<strong>🕒 Previsão para Hoje:</strong><br>${resumoHoje}`;
+      const probChuva = Math.round(previsao.list[0].pop * 100); // 0.4 → 40%
+      previsaoDiv.innerHTML = `
+        <strong>🕒 Previsão para Hoje:</strong><br>
+        ${resumoHoje}<br>
+        🌧️ Chance de chuva: ${probChuva}%
+      `;
 
+      // Previsão detalhada de amanhã
       const textoPrevisaoAmanha = obterPrevisaoAmanha(previsao);
       previsaoAmanhaDiv.innerHTML = `<strong>🗓️ Previsão para Amanhã:</strong><br>${textoPrevisaoAmanha}`;
 
+      // Recomendação de roupa
       const recomendacao = recomendarRoupa(clima.main.temp, desc);
       atividadeDiv.innerHTML = `<strong>👕 Recomendações:</strong><br>${recomendacao}`;
 
+      // Qualidade do ar
       const qualidade = interpretarQualidadeAr(qualidadeAr.list[0].main.aqi);
       qualidadeArDiv.innerHTML = `<strong>💨 Qualidade do Ar:</strong><br>${qualidade}`;
 
+      // Alertas
       if (previsao.city && previsao.city.alerts && previsao.city.alerts.length > 0) {
         const textoAlertas = previsao.city.alerts.map(a => a.description).join('<br>');
         alertasDiv.innerHTML = `<strong>⚠️ Alertas:</strong><br>${textoAlertas}`;
-        enviarNotificacao(previsao.city.alerts.map(a => a.description).join('\n'));
+        enviarNotificacao(textoAlertas);
       } else {
         alertasDiv.innerHTML = `<strong>⚠️ Alertas:</strong><br>Nenhum alerta climático.`;
       }
 
+      // Mapa
       mapDiv.classList.add('active');
       mostrarMapa(localizacao.lat, localizacao.lon);
 
     } else {
       resultado.textContent = `Erro na resposta da API: ${clima.message || 'Resposta inesperada'}`;
     }
+
   } catch (error) {
     resultado.textContent = `Erro: ${error.message || error}`;
   } finally {
