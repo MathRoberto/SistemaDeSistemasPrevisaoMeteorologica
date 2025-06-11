@@ -8,7 +8,7 @@ const alertasDiv = document.getElementById('alertas');
 const mapDiv = document.getElementById('map');
 const loadingOverlay = document.getElementById('loading-overlay');
 
-const apiKey = 'dc9622e76c7ae551aaa95734ef641e14';
+const apiKey = CONFIG.API_KEY;
 
 // Pedir permissão ao carregar
 document.addEventListener('DOMContentLoaded', () => {
